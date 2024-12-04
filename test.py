@@ -1,22 +1,10 @@
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.mixture import GaussianMixture
 from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import RandomizedSearchCV
 import numpy as np
 import librosa
 from sklearn.metrics import accuracy_score
-
-trainSet = {
-    0: ["path/f1/f10.wav", "path/f2/f20.wav", "path/f3/f30.wav", "path/f4/f40.wav", "path/m1/m10.wav", "path/m2/m20.wav", "path/m3/m30.wav"],
-    1: ["path/f1/f11.wav", "path/f2/f21.wav", "path/f3/f31.wav", "path/f4/f41.wav", "path/m1/m11.wav", "path/m2/m21.wav", "path/m3/m31.wav"],
-    2: ["path/f1/f12.wav", "path/f2/f22.wav", "path/f3/f32.wav", "path/f4/f42.wav", "path/m1/m12.wav", "path/m2/m22.wav", "path/m3/m32.wav"],
-    3: ["path/f1/f13.wav", "path/f2/f23.wav", "path/f3/f33.wav", "path/f4/f43.wav", "path/m1/m13.wav", "path/m2/m23.wav", "path/m3/m33.wav"],
-    4: ["path/f1/f14.wav", "path/f2/f24.wav", "path/f3/f34.wav", "path/f4/f44.wav", "path/m1/m14.wav", "path/m2/m24.wav", "path/m3/m34.wav"],
-    5: ["path/f1/f15.wav", "path/f2/f25.wav", "path/f3/f35.wav", "path/f4/f45.wav", "path/m1/m15.wav", "path/m2/m25.wav", "path/m3/m35.wav"],
-    6: ["path/f1/f16.wav", "path/f2/f26.wav", "path/f3/f36.wav", "path/f4/f46.wav", "path/m1/m16.wav", "path/m2/m26.wav", "path/m3/m36.wav"],
-    7: ["path/f1/f17.wav", "path/f2/f27.wav", "path/f3/f37.wav", "path/f4/f47.wav", "path/m1/m17.wav", "path/m2/m27.wav", "path/m3/m37.wav"],
-    8: ["path/f1/f18.wav", "path/f2/f28.wav", "path/f3/f38.wav", "path/f4/f48.wav", "path/m1/m18.wav", "path/m2/m28.wav", "path/m3/m38.wav"],
-    9: ["path/f1/f19.wav", "path/f2/f29.wav", "path/f3/f39.wav", "path/f4/f49.wav", "path/m1/m19.wav", "path/m2/m29.wav", "path/m3/m39.wav"]
-}
 
 testSet = {
     0: ["path/m4/m40.wav"],
@@ -31,25 +19,41 @@ testSet = {
     9: ["path/m4/m49.wav"]
 }
 
+trainSet = {
+    0: ["path/f1/f10.wav", "path/f2/f20.wav", "path/f3/f30.wav", "path/f4/f40.wav", "path/m1/m10.wav", "path/m2/m20.wav", "path/m3/m30.wav"],
+    1: ["path/f1/f11.wav", "path/f2/f21.wav", "path/f3/f31.wav", "path/f4/f41.wav", "path/m1/m11.wav", "path/m2/m21.wav", "path/m3/m31.wav"],
+    2: ["path/f1/f12.wav", "path/f2/f22.wav", "path/f3/f32.wav", "path/f4/f42.wav", "path/m1/m12.wav", "path/m2/m22.wav", "path/m3/m32.wav"],
+    3: ["path/f1/f13.wav", "path/f2/f23.wav", "path/f3/f33.wav", "path/f4/f43.wav", "path/m1/m13.wav", "path/m2/m23.wav", "path/m3/m33.wav"],
+    4: ["path/f1/f14.wav", "path/f2/f24.wav", "path/f3/f34.wav", "path/f4/f44.wav", "path/m1/m14.wav", "path/m2/m24.wav", "path/m3/m34.wav"],
+    5: ["path/f1/f15.wav", "path/f2/f25.wav", "path/f3/f35.wav", "path/f4/f45.wav", "path/m1/m15.wav", "path/m2/m25.wav", "path/m3/m35.wav"],
+    6: ["path/f1/f16.wav", "path/f2/f26.wav", "path/f3/f36.wav", "path/f4/f46.wav", "path/m1/m16.wav", "path/m2/m26.wav", "path/m3/m36.wav"],
+    7: ["path/f1/f17.wav", "path/f2/f27.wav", "path/f3/f37.wav", "path/f4/f47.wav", "path/m1/m17.wav", "path/m2/m27.wav", "path/m3/m37.wav"],
+    8: ["path/f1/f18.wav", "path/f2/f28.wav", "path/f3/f38.wav", "path/f4/f48.wav", "path/m1/m18.wav", "path/m2/m28.wav", "path/m3/m38.wav"],
+    9: ["path/f1/f19.wav", "path/f2/f29.wav", "path/f3/f39.wav", "path/f4/f49.wav", "path/m1/m19.wav", "path/m2/m29.wav", "path/m3/m39.wav"]
+}
+
+
 # Custom wrapper for GMM
 class GMMWrapper(BaseEstimator, ClassifierMixin):
-    def __init__(self, n_components=1, covariance_type='diag', max_iter=100):
+    def __init__(self, n_components=1, covariance_type='diag', max_iter=100, n_init=10):
         self.n_components = n_components
         self.covariance_type = covariance_type
         self.max_iter = max_iter
+        self.n_init = n_init
         self.gmm = None
 
-    def fit(self, X, y=None):
+    def fit(self, X):
         self.gmm = GaussianMixture(
             n_components=self.n_components,
             covariance_type=self.covariance_type,
             max_iter=self.max_iter,
+            n_init=self.n_init,
             random_state=42
         )
         self.gmm.fit(X)
         return self
 
-    def score(self, X, y=None):
+    def score(self, X):
         # Return the log-likelihood score
         return self.gmm.score(X)
 
@@ -71,9 +75,10 @@ def get_mfcc(file):
 def train_models_with_grid_search(trainSet):
     best_models = {}
     param_grid = {
-        'n_components': range(1, 10, 2),
+        'n_components': range(3, 7, 1),
         'covariance_type': ['full', 'diag', 'tied', 'spherical'],
-        'max_iter': [100, 200, 300, 400]
+        'max_iter': [100, 200, 300],
+        'n_init' : range(5, 20, 5)
     }
 
     for label, files in trainSet.items():
@@ -81,11 +86,12 @@ def train_models_with_grid_search(trainSet):
         mfcc_features = np.concatenate([get_mfcc(file) for file in files], axis=0)
 
         # Use GridSearchCV with GMMWrapper
-        gmm_grid = GridSearchCV(
+        gmm_grid = RandomizedSearchCV(
             estimator=GMMWrapper(),
-            param_grid=param_grid,
-            scoring=None,  # Use estimator's score method
-            cv=5  # 3-fold cross-validation
+            param_distributions=param_grid,
+            n_iter=20,
+            cv=5,
+            n_jobs=-1,
         )
         gmm_grid.fit(mfcc_features)
         best_models[label] = gmm_grid.best_estimator_

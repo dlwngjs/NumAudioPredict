@@ -2,33 +2,6 @@ import numpy as np
 import librosa
 from sklearn.mixture import GaussianMixture
 from sklearn.metrics import accuracy_score
-from audiomentations import Compose, AddGaussianNoise, TimeStretch, PitchShift, Shift, Normalize
-
-trainSet = {
-    0: ["path/f1/f10.wav", "path/f2/f20.wav", "path/f3/f30.wav", "path/f4/f40.wav", "path/m1/m10.wav", "path/m2/m20.wav", "path/m3/m30.wav", "path/m4/m40.wav"],
-    1: ["path/f1/f11.wav", "path/f2/f21.wav", "path/f3/f31.wav", "path/f4/f41.wav", "path/m1/m11.wav", "path/m2/m21.wav", "path/m3/m31.wav", "path/m4/m41.wav"],
-    2: ["path/f1/f12.wav", "path/f2/f22.wav", "path/f3/f32.wav", "path/f4/f42.wav", "path/m1/m12.wav", "path/m2/m22.wav", "path/m3/m32.wav", "path/m4/m42.wav"],
-    3: ["path/f1/f13.wav", "path/f2/f23.wav", "path/f3/f33.wav", "path/f4/f43.wav", "path/m1/m13.wav", "path/m2/m23.wav", "path/m3/m33.wav", "path/m4/m43.wav"],
-    4: ["path/f1/f14.wav", "path/f2/f24.wav", "path/f3/f34.wav", "path/f4/f44.wav", "path/m1/m14.wav", "path/m2/m24.wav", "path/m3/m34.wav", "path/m4/m44.wav"],
-    5: ["path/f1/f15.wav", "path/f2/f25.wav", "path/f3/f35.wav", "path/f4/f45.wav", "path/m1/m15.wav", "path/m2/m25.wav", "path/m3/m35.wav", "path/m4/m45.wav"],
-    6: ["path/f1/f16.wav", "path/f2/f26.wav", "path/f3/f36.wav", "path/f4/f46.wav", "path/m1/m16.wav", "path/m2/m26.wav", "path/m3/m36.wav", "path/m4/m46.wav"],
-    7: ["path/f1/f17.wav", "path/f2/f27.wav", "path/f3/f37.wav", "path/f4/f47.wav", "path/m1/m17.wav", "path/m2/m27.wav", "path/m3/m37.wav", "path/m4/m47.wav"],
-    8: ["path/f1/f18.wav", "path/f2/f28.wav", "path/f3/f38.wav", "path/f4/f48.wav", "path/m1/m18.wav", "path/m2/m28.wav", "path/m3/m38.wav", "path/m4/m48.wav"],
-    9: ["path/f1/f19.wav", "path/f2/f29.wav", "path/f3/f39.wav", "path/f4/f49.wav", "path/m1/m19.wav", "path/m2/m29.wav", "path/m3/m39.wav", "path/m4/m49.wav"]
-}
-
-testSet = {
-    0: ["path/test/t0.wav"],
-    1: ["path/test/t1.wav"],
-    2: ["path/test/t2.wav"],
-    3: ["path/test/t3.wav"],
-    4: ["path/test/t4.wav"],
-    5: ["path/test/t5.wav"],
-    6: ["path/test/t6.wav"],
-    7: ["path/test/t7.wav"],
-    8: ["path/test/t8.wav"],
-    9: ["path/test/t9.wav"]
-}
 
 # trainSet = {
 #     0: ["path/f1/f10.wav", "path/f2/f20.wav", "path/f3/f30.wav", "path/f4/f40.wav", "path/m1/m10.wav", "path/m2/m20.wav", "path/m3/m30.wav"],
@@ -82,42 +55,32 @@ testSet = {
 #     9: ["path/f1/f19.wav", "path/f3/f39.wav", "path/f4/f49.wav", "path/m1/m19.wav", "path/m2/m29.wav", "path/m3/m39.wav", "path/m4/m49.wav"]
 # }
 
-# testSet = {
-#     0: ["path/f1/f10.wav"],
-#     1: ["path/m1/m11.wav"],
-#     2: ["path/m3/m32.wav"],
-#     3: ["path/m2/m23.wav"],
-#     4: ["path/f2/f24.wav"],
-#     5: ["path/m2/m25.wav"],
-#     6: ["path/f1/f16.wav"],
-#     7: ["path/f3/f37.wav"],
-#     8: ["path/m1/m18.wav"],
-#     9: ["path/f2/f29.wav"]
-# }
+testSet = {
+    0: ["path/f4/f40.wav"],
+    1: ["path/f4/f41.wav"],
+    2: ["path/f4/f42.wav"],
+    3: ["path/f4/f43.wav"],
+    4: ["path/f4/f44.wav"],
+    5: ["path/f4/f45.wav"],
+    6: ["path/f4/f46.wav"],
+    7: ["path/f4/f47.wav"],
+    8: ["path/f4/f48.wav"],
+    9: ["path/f4/f49.wav"]
+}
 
-# trainSet = {
-#     0: ["path/f2/f20.wav", "path/f3/f30.wav", "path/f4/f40.wav", "path/m1/m10.wav", "path/m2/m20.wav", "path/m3/m30.wav", "path/m4/m40.wav"],
-#     1: ["path/f1/f11.wav", "path/f2/f21.wav", "path/f3/f31.wav", "path/f4/f41.wav", "path/m2/m21.wav", "path/m3/m31.wav", "path/m4/m41.wav"],
-#     2: ["path/f1/f12.wav", "path/f2/f22.wav", "path/f3/f32.wav", "path/f4/f42.wav", "path/m1/m12.wav", "path/m2/m22.wav", "path/m4/m42.wav"],
-#     3: ["path/f1/f13.wav", "path/f2/f23.wav", "path/f3/f33.wav", "path/f4/f43.wav", "path/m1/m13.wav", "path/m3/m33.wav", "path/m4/m43.wav"],
-#     4: ["path/f1/f14.wav", "path/f3/f34.wav", "path/f4/f44.wav", "path/m1/m14.wav", "path/m2/m24.wav", "path/m3/m34.wav", "path/m4/m44.wav"],
-#     5: ["path/f1/f15.wav", "path/f2/f25.wav", "path/f3/f35.wav", "path/f4/f45.wav", "path/m1/m15.wav", "path/m3/m35.wav", "path/m4/m45.wav"],
-#     6: ["path/f2/f26.wav", "path/f3/f36.wav", "path/f4/f46.wav", "path/m1/m16.wav", "path/m2/m26.wav", "path/m3/m36.wav", "path/m4/m46.wav"],
-#     7: ["path/f1/f17.wav", "path/f2/f27.wav", "path/f4/f47.wav", "path/m1/m17.wav", "path/m2/m27.wav", "path/m3/m37.wav", "path/m4/m47.wav"],
-#     8: ["path/f1/f18.wav", "path/f2/f28.wav", "path/f3/f38.wav", "path/f4/f48.wav", "path/m2/m28.wav", "path/m3/m38.wav", "path/m4/m48.wav"],
-#     9: ["path/f1/f19.wav", "path/f3/f39.wav", "path/f4/f49.wav", "path/m1/m19.wav", "path/m2/m29.wav", "path/m3/m39.wav", "path/m4/m49.wav"]
-# }
+trainSet = {
+    0: ["path/f1/f10.wav", "path/f2/f20.wav", "path/f3/f30.wav", "path/m1/m10.wav", "path/m2/m20.wav", "path/m3/m30.wav", "path/m4/m40.wav"],
+    1: ["path/f1/f11.wav", "path/f2/f21.wav", "path/f3/f31.wav", "path/m1/m11.wav", "path/m2/m21.wav", "path/m3/m31.wav", "path/m4/m41.wav"],
+    2: ["path/f1/f12.wav", "path/f2/f22.wav", "path/f3/f32.wav", "path/m1/m12.wav", "path/m2/m22.wav", "path/m3/m32.wav", "path/m4/m42.wav"],
+    3: ["path/f1/f13.wav", "path/f2/f23.wav", "path/f3/f33.wav", "path/m1/m13.wav", "path/m2/m23.wav", "path/m3/m33.wav", "path/m4/m43.wav"],
+    4: ["path/f1/f14.wav", "path/f2/f24.wav", "path/f3/f34.wav", "path/m1/m14.wav", "path/m2/m24.wav", "path/m3/m34.wav", "path/m4/m44.wav"],
+    5: ["path/f1/f15.wav", "path/f2/f25.wav", "path/f3/f35.wav", "path/m1/m15.wav", "path/m2/m25.wav", "path/m3/m35.wav", "path/m4/m45.wav"],
+    6: ["path/f1/f16.wav", "path/f2/f26.wav", "path/f3/f36.wav", "path/m1/m16.wav", "path/m2/m26.wav", "path/m3/m36.wav", "path/m4/m46.wav"],
+    7: ["path/f1/f17.wav", "path/f2/f27.wav", "path/f3/f37.wav", "path/m1/m17.wav", "path/m2/m27.wav", "path/m3/m37.wav", "path/m4/m47.wav"],
+    8: ["path/f1/f18.wav", "path/f2/f28.wav", "path/f3/f38.wav", "path/m1/m18.wav", "path/m2/m28.wav", "path/m3/m38.wav", "path/m4/m48.wav"],
+    9: ["path/f1/f19.wav", "path/f2/f29.wav", "path/f3/f39.wav", "path/m1/m19.wav", "path/m2/m29.wav", "path/m3/m39.wav", "path/m4/m49.wav"]
+}
 
-augment = Compose([
-    AddGaussianNoise(min_amplitude=0.001, max_amplitude=0.015, p=0.5),
-    TimeStretch(min_rate=0.8, max_rate=1.25, p=0.5),
-    PitchShift(min_semitones=-2, max_semitones=2, p=0.5),
-    Shift(min_shift=-0.5, max_shift=0.5, p=0.5),
-    Normalize(p=1.0),
-])
-
-def augment_audio(y, sr):
-    return augment(samples=y, sample_rate=sr)
 
 def get_mfcc(file):
     y, sr = librosa.load(file, sr=16000)
