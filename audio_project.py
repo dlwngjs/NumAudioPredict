@@ -6,6 +6,14 @@ import os
 import shutil
 import re
 
+'''
+train_data_folder에 훈련 데이터 파일들을 넣어두시면 됩니다.
+test_data_folder에 테스트 데이터 파일들을 넣어두시면 됩니다.
+
+단 모든 파일명은 해당 음성의 숫자로 끝나야 합니다.
+ex) 0을 말하는 파일이라면 ~~~0.wav 형식이여야 합니다.
+'''
+
 train_data_folder = './train_path'
 test_data_folder = './test_path'
 
@@ -150,7 +158,7 @@ def main():
         print(f"Acc : {acc}")
         if(acc > max_acc):
             max_acc = acc
-            max_gmm_model = gmm_models
+            best_gmm_model = gmm_models
         if(max_acc >= 0.8):
             break
     # 최적의 랜덤값을 가진 모델로 테스트
@@ -159,7 +167,7 @@ def main():
     for label, files in testSet.items():
         for file in files:
             y_true.append(label)
-            y_pred.append(predict(max_gmm_model, file))
+            y_pred.append(predict(best_gmm_model, file))
 
     acc = accuracy_score(y_true, y_pred)
     print(f"y_true : {y_true}\ny_pred : {y_pred}")
